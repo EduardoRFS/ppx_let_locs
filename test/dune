@@ -1,0 +1,19 @@
+(executable
+ (name test)
+ (libraries lwt lwt.unix)
+ (preprocess
+  (staged_pps ppx_locs)))
+
+(rule
+ (targets trace.result)
+ (deps
+  (:test test.exe))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{test}))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff trace.expected trace.result)))
