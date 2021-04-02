@@ -1,0 +1,6 @@
+(library
+ (name ppx_locs_typer)
+ (public_name ppx_locs.typer)
+ (flags
+  (:standard -w -9))
+ (libraries compiler-libs.common))
