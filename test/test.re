@@ -1,8 +1,9 @@
 Printexc.record_backtrace(true);
 
-let fail = () => raise(Invalid_argument("just checking stack"));
-
-try(Lwt.bind(Lwt_unix.sleep(0.01), fail) |> Lwt_main.run) {
+try(
+  Lwt.bind(Lwt_unix.opendir("invalid_dir"), _ => Lwt.return_unit)
+  |> Lwt_main.run
+) {
 | _ =>
   print_endline("backtraced: ");
   Printexc.print_backtrace(stdout);
@@ -10,7 +11,10 @@ try(Lwt.bind(Lwt_unix.sleep(0.01), fail) |> Lwt_main.run) {
 };
 
 try(
-  ([@ppx_locs.ignore] Lwt.bind)(Lwt_unix.sleep(0.01), fail) |> Lwt_main.run
+  ([@ppx_locs.ignore] Lwt.bind)(Lwt_unix.opendir("invalid_dir"), _ =>
+    Lwt.return_unit
+  )
+  |> Lwt_main.run
 ) {
 | _ =>
   print_endline("ignore: ");
