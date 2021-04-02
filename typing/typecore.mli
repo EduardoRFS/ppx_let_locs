@@ -18,6 +18,11 @@
 open Asttypes
 open Types
 
+val hacked_pexp_apply:
+  (Env.t ->
+  Parsetree.expression ->
+  Typedtree.expression option) ref
+
 (* This variant is used to print improved error messages, and does not affect
    the behavior of the typechecker itself.
 

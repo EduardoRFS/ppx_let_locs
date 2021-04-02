@@ -23,6 +23,8 @@ open Typedtree
 open Btype
 open Ctype
 
+let hacked_pexp_apply = ref (fun _ -> assert false)
+
 type type_forcing_context =
   | If_conditional
   | If_no_else_branch
@@ -2731,7 +2733,11 @@ and type_expect_
       assert (sargs <> []);
       begin_def (); (* one more level for non-returning functions *)
       if !Clflags.principal then begin_def ();
+      let funct = match !hacked_pexp_apply env sfunct with
+      | Some v -> v
+      | None ->
       let funct = type_exp env sfunct in
+      funct in
       if !Clflags.principal then begin
           end_def ();
           generalize_structure funct.exp_type
