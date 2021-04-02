@@ -2569,7 +2569,36 @@ and type_expect ?in_function ?recarg env sexp ty_expected_explained =
   let exp =
     Builtin_attributes.warning_scope sexp.pexp_attributes
       (fun () ->
+        let saved = save_levels () in
+        try
          type_expect_ ?in_function ?recarg env sexp ty_expected_explained
+        with _exn -> 
+          set_levels saved;
+          let loc = sexp.pexp_loc in
+          {
+          exp_desc = Texp_ident
+                        (Path.Pident (Ident.create_local "*type-error*"),
+                        Location.mkloc (Longident.Lident "*type-error*") loc,
+                        { Types.
+                          val_type = ty_expected_explained.ty;
+                          val_kind = Val_reg;
+                          val_loc = loc;
+                          val_attributes = [];
+                          val_uid = Uid.internal_not_actually_unique;
+                        });
+          exp_loc = loc;
+          exp_extra = [];
+          exp_type = ty_expected_explained.ty;
+          exp_env = env;
+          exp_attributes = [{
+            attr_name = { loc; txt = "untype.data" };
+            attr_payload = PStr([{
+              pstr_loc = loc;
+              pstr_desc = Pstr_eval(sexp, [])
+            }]);
+            attr_loc = loc
+          }];
+        }
       )
   in
   Cmt_format.set_saved_types
@@ -5122,6 +5151,9 @@ let type_expression env sexp =
   end_def();
   if maybe_expansive exp then lower_contravariant env exp.exp_type;
   generalize exp.exp_type;
+  match exp.exp_attributes with
+  | [ { attr_name = { txt = "untype.data"; _ }; _  } ] -> exp
+  | _ -> 
   match sexp.pexp_desc with
     Pexp_ident lid ->
       let loc = sexp.pexp_loc in
