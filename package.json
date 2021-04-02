@@ -1,0 +1,13 @@
+{
+  "name": "ppx_locs",
+  "dependencies": {
+    "ocaml": "4.12",
+    "@opam/dune": "*",
+    "@opam/reason": "*",
+    "@opam/ppxlib": "*"
+  },
+  "devDependencies": {
+    "@opam/ocaml-lsp-server": "*",
+    "@opam/lwt": "*"
+  }
+}
