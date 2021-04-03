@@ -3,4 +3,18 @@
  (public_name ppx_let_locs.typer)
  (flags
   (:standard -w -9))
+ (modules Typeclass Typecore Typemod)
  (libraries compiler-libs.common))
+
+(rule
+ (targets
+  typeclass.ml
+  typeclass.mli
+  typecore.ml
+  typecore.mli
+  typemod.ml
+  typemod.mli)
+ (deps
+  (:script copy_files.ml))
+ (action
+  (run %{ocaml} %{script})))
