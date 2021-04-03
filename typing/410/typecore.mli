@@ -18,6 +18,19 @@
 open Asttypes
 open Types
 
+val hacked_pexp_apply:
+  (Env.t ->
+  Parsetree.expression ->
+  Typedtree.expression option) ref
+
+val hacked_pexp_letop:
+  (Env.t ->
+   Parsetree.binding_op ->
+   Parsetree.binding_op option) ref
+
+val hacked_value_binding:
+  (Parsetree.value_binding list -> Parsetree.value_binding list) ref
+
 (* This variant is used to print improved error messages, and does not affect
    the behavior of the typechecker itself.
 
@@ -47,6 +60,15 @@ type type_expected = private {
   ty: type_expr;
   explanation: type_forcing_context option;
 }
+
+val hacked_type_expect:
+   (((
+     Env.t ->
+     Parsetree.expression ->
+     type_expected ->
+     Typedtree.expression) as 'a) ->
+     'a
+   ) ref
 
 val mk_expected:
   ?explanation:type_forcing_context ->

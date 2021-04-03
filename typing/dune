@@ -10,26 +10,16 @@
  (action
   (copy ../ocaml_version.txt ocaml_version.txt)))
 
-(rule
- (action
-  (copy typemod_%{read:ocaml_version.txt}.ml typemod.ml)))
+(copy_files
+ (files 410/*)
+ (enabled_if
+  (and
+   (>= %{ocaml_version} 4.10.0)
+   (< %{ocaml_version} 4.11.0))))
 
-(rule
- (action
-  (copy typemod_%{read:ocaml_version.txt}.mli typemod.mli)))
-
-(rule
- (action
-  (copy typecore_%{read:ocaml_version.txt}.ml typecore.ml)))
-
-(rule
- (action
-  (copy typecore_%{read:ocaml_version.txt}.mli typecore.mli)))
-
-(rule
- (action
-  (copy typeclass_%{read:ocaml_version.txt}.ml typeclass.ml)))
-
-(rule
- (action
-  (copy typeclass_%{read:ocaml_version.txt}.mli typeclass.mli)))
+(copy_files
+ (files 412/*)
+ (enabled_if
+  (and
+   (>= %{ocaml_version} 4.12.0)
+   (< %{ocaml_version} 4.13.0))))
