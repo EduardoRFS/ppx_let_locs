@@ -240,17 +240,18 @@ module Typer = {
     |> List.concat_map(binding => {
          let.default () = [binding];
          let.some body =
-           switch (binding.Parsetree.pvb_attributes) {
-           | [
-               {
-                 attr_name: {txt: "ppx_let_locs.use", _},
-                 attr_payload: PStr([{pstr_desc: Pstr_eval(sexp, []), _}]),
-                 _,
-               },
-             ] =>
-             Some(sexp)
-           | _ => None
-           };
+           binding.Parsetree.pvb_attributes
+           |> List.find_map(
+                fun
+                | {
+                    Parsetree.attr_name: {txt: "ppx_let_locs.use", _},
+                    attr_payload:
+                      PStr([{pstr_desc: Pstr_eval(sexp, []), _}]),
+                    _,
+                  } =>
+                  Some(sexp)
+                | _ => None,
+              );
          let.some name =
            switch (binding.pvb_pat.ppat_desc) {
            | Ppat_var(name) =>
@@ -271,19 +272,25 @@ module Typer = {
     | Parsetree.{
         psig_desc:
           Psig_value({
-            pval_attributes: [
-              {
-                attr_name: {txt: "ppx_let_locs.use", _},
-                attr_payload: PStr([]),
-                _,
-              },
-            ],
+            pval_attributes,
             pval_name,
             pval_type: {ptyp_desc: Ptyp_arrow(Nolabel, left, right), _},
             _,
           }),
         psig_loc,
-      } => {
+      }
+        when
+          pval_attributes
+          |> List.exists(
+               fun
+               | {
+                   Parsetree.attr_name: {txt: "ppx_let_locs.use", _},
+                   attr_payload: PStr([]),
+                   _,
+                 } =>
+                 true
+               | _ => false,
+             ) => {
         // TODO: this clearly needs better locs
         Some(
           Codegen.make_additional_value_typ(
