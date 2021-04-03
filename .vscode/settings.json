@@ -1,6 +1,6 @@
 {
   "ocaml.sandbox": {
     "kind": "esy",
-    "root": "${workspaceFolder:ppx_locs}"
+    "root": "${workspaceFolder:ppx_let_locs}"
   }
 }

@@ -6,6 +6,8 @@
  (name ppx_let_locs)
  (depends
   (ocaml
-   (= "4.12.0"))
+   (and
+    (>= "4.12.0")
+    (< "4.13.0")))
   reason
   ppxlib))
