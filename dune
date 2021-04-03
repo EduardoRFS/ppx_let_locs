@@ -1,0 +1,8 @@
+(rule
+ (targets ocaml_version.txt)
+ (deps
+  (:script ocaml_version.ml))
+ (action
+  (with-stdout-to
+   ocaml_version.txt
+   (run %{ocaml} %{script}))))

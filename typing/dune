@@ -7,14 +7,29 @@
  (libraries compiler-libs.common))
 
 (rule
- (targets
-  typeclass.ml
-  typeclass.mli
-  typecore.ml
-  typecore.mli
-  typemod.ml
-  typemod.mli)
- (deps
-  (:script copy_files.ml))
  (action
-  (run %{ocaml} %{script})))
+  (copy ../ocaml_version.txt ocaml_version.txt)))
+
+(rule
+ (action
+  (copy typemod_%{read:ocaml_version.txt}.ml typemod.ml)))
+
+(rule
+ (action
+  (copy typemod_%{read:ocaml_version.txt}.mli typemod.mli)))
+
+(rule
+ (action
+  (copy typecore_%{read:ocaml_version.txt}.ml typecore.ml)))
+
+(rule
+ (action
+  (copy typecore_%{read:ocaml_version.txt}.mli typecore.mli)))
+
+(rule
+ (action
+  (copy typeclass_%{read:ocaml_version.txt}.ml typeclass.ml)))
+
+(rule
+ (action
+  (copy typeclass_%{read:ocaml_version.txt}.mli typeclass.mli)))
