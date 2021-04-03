@@ -1,4 +1,9 @@
 let (let.some) = Option.bind;
+let (let.none) = (v, f) =>
+  switch (v) {
+  | Some(v) => Some(v)
+  | None => f()
+  };
 let (let.default) = (v, f) =>
   switch (f()) {
   | Some(v) => v
@@ -59,11 +64,12 @@ module Codegen = {
     };
   };
 
-  let make_additional_binding = (name, body) => {
+  let make_additional_binding = (is_letop, name, body) => {
     let loc = body.pexp_loc;
     let additional_binding = {
       pvb_pat: ppat_var(~loc, name),
-      pvb_expr: [%expr ((exn, v), f) => [%e body](exn, v, f)],
+      pvb_expr:
+        is_letop ? [%expr ((exn, v), f) => [%e body](exn, v, f)] : body,
       pvb_attributes: [],
       pvb_loc: loc,
     };
@@ -95,6 +101,14 @@ module Typer = {
 
   let prepend_backtrace = str => "backtrace_" ++ str;
   let append_backtrace = str => str ++ "_backtrace";
+
+  let is_letop = {
+    let chars = "$&*+-/<=>@^|.";
+    str =>
+      String.length(str) >= 4
+      && String.sub(str, 0, 3) == "let"
+      && String.index_opt(chars, str.[3]) != None;
+  };
 
   // this transforms Lwt.bind into Lwt.backtrace_bind
   let hacked_pexp_apply = (env: Env.t, sfunct: Parsetree.expression) => {
@@ -221,7 +235,11 @@ module Typer = {
              Some({...name, txt: append_backtrace(name.txt)})
            | _ => None
            };
-         Some([binding, Codegen.make_additional_binding(name, body)]);
+         let is_letop = is_letop(name.txt);
+         Some([
+           binding,
+           Codegen.make_additional_binding(is_letop, name, body),
+         ]);
        });
   Typecore.hacked_value_binding := hacked_value_binding;
 };
