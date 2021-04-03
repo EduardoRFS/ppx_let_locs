@@ -28,6 +28,35 @@ module Codegen = {
     attr_payload: PStr([]),
     attr_loc: loc,
   };
+  let ocaml_warning = (loc, str) => {
+    attr_name: {
+      loc,
+      txt: "ocaml.warning",
+    },
+    attr_payload:
+      PStr([
+        pstr_eval(
+          ~loc,
+          pexp_constant(~loc, Pconst_string(str, loc, None)),
+          [],
+        ),
+      ]),
+    attr_loc: loc,
+  };
+  let append_warning_description = (warning, descr) => {
+    ...descr,
+    pval_attributes: [
+      ocaml_warning(descr.pval_loc, warning),
+      ...descr.pval_attributes,
+    ],
+  };
+  let append_warning_binding = (warning, binding) => {
+    ...binding,
+    pvb_attributes: [
+      ocaml_warning(binding.pvb_loc, warning),
+      ...binding.pvb_attributes,
+    ],
+  };
   let append_attributes = (attrs, exp) => {
     ...exp,
     pexp_attributes: exp.pexp_attributes @ attrs,
@@ -260,7 +289,7 @@ module Typer = {
            };
          let is_letop = is_letop(name.txt);
          Some([
-           binding,
+           Codegen.append_warning_binding("-32", binding),
            Codegen.make_additional_binding(is_letop, name, body),
          ]);
        });
@@ -271,12 +300,14 @@ module Typer = {
     fun
     | Parsetree.{
         psig_desc:
-          Psig_value({
-            pval_attributes,
-            pval_name,
-            pval_type: {ptyp_desc: Ptyp_arrow(Nolabel, left, right), _},
-            _,
-          }),
+          Psig_value(
+            {
+              pval_attributes,
+              pval_name,
+              pval_type: {ptyp_desc: Ptyp_arrow(Nolabel, left, right), _},
+              _,
+            } as description,
+          ),
         psig_loc,
       }
         when
@@ -292,7 +323,14 @@ module Typer = {
                | _ => false,
              ) => {
         // TODO: this clearly needs better locs
-        Some(
+        Some((
+          {
+            Parsetree.psig_loc,
+            psig_desc:
+              Psig_value(
+                Codegen.append_warning_description("-32", description),
+              ),
+          },
           Codegen.make_additional_value_typ(
             ~loc=psig_loc,
             is_letop(pval_name.txt),
@@ -300,13 +338,13 @@ module Typer = {
             left,
             right,
           ),
-        );
+        ));
       }
     | _ => None;
   let hacked_transl_sig = (item, srem) =>
     switch (additional_signature_item(item)) {
-    | Some(v) => [v, ...srem]
-    | None => srem
+    | Some((item, v)) => (item, [v, ...srem])
+    | None => (item, srem)
     };
   Typemod.hacked_transl_sig := hacked_transl_sig;
 
@@ -318,7 +356,7 @@ module Typer = {
         |> List.concat_map(sigi => {
              let sigi = Ast_mapper.default_mapper.signature_item(super, sigi);
              switch (additional_signature_item(sigi)) {
-             | Some(add) => [sigi, add]
+             | Some((sigi, v)) => [sigi, v]
              | None => [sigi]
              };
            }),

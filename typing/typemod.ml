@@ -1207,7 +1207,7 @@ and transl_signature env sg =
       [] -> [], [], env
     | item :: srem ->
         let loc = item.psig_loc in
-        let srem = !hacked_transl_sig item srem in
+        let item, srem = !hacked_transl_sig item srem in
         match item.psig_desc with
         | Psig_value sdesc ->
             let (tdesc, newenv) =
