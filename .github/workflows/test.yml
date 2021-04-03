@@ -39,4 +39,4 @@ jobs:
           cache-key: ${{ hashFiles('esy.lock/index.json') }}
 
       - name: Test
-        run: esy @override test
+        run: esy @override b dune runtest
