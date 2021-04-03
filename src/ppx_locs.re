@@ -38,6 +38,20 @@ module Codegen = {
       append_attributes([ppx_locs_ignore(loc), merlin_focus(loc)], fn);
     Fun.id([%expr [%e fn]([%e make_reraise_exn(loc)])]);
   };
+  let make_let_with_reraise = let_ => {
+    let {pbop_exp, _} = let_;
+    {
+      ...let_,
+      pbop_exp:
+        pexp_tuple(
+          ~loc=pbop_exp.pexp_loc,
+          [
+            make_reraise_exn(pbop_exp.pexp_loc),
+            append_attributes([merlin_focus(pbop_exp.pexp_loc)], pbop_exp),
+          ],
+        ),
+    };
+  };
 };
 
 module Typer = {
@@ -50,6 +64,17 @@ module Typer = {
   let is_backtraced_signature = (env, expr) =>
     Ctype.matches(env, expr, backtraced_signature_typ);
 
+  let backtraced_letop_typ =
+    Ctype.newty(
+      Tarrow(
+        Nolabel,
+        Ctype.newty(Ttuple([exn_callback_typ, Ctype.newvar()])),
+        Ctype.newvar(),
+        Cok,
+      ),
+    );
+  let is_backtraced_letop = (env, expr) =>
+    Ctype.matches(env, expr, backtraced_letop_typ);
   let hacked_pexp_apply = (env: Env.t, sfunct: Parsetree.expression) => {
     let.some lid =
       switch (sfunct.pexp_desc, sfunct.pexp_attributes) {
@@ -81,6 +106,20 @@ module Typer = {
     Some(Typecore.type_exp(env, sfunct));
   };
   Typecore.hacked_pexp_apply := hacked_pexp_apply;
+
+  let hacked_pexp_letop = (env: Env.t, slet: Parsetree.binding_op) => {
+    // TODO: is it okay to generate Pexp_apply?
+    let lid =
+      Location.mkloc(Longident.Lident(slet.pbop_op.txt), slet.pbop_op.loc);
+    let.some (_path, desc) =
+      switch (Env.lookup_value(~loc=lid.loc, lid.txt, env)) {
+      | value => Some(value)
+      | exception _exn => None
+      };
+    let.some () = is_backtraced_letop(env, desc.val_type) ? Some() : None;
+    Some(Codegen.make_let_with_reraise(slet));
+  };
+  Typecore.hacked_pexp_letop := hacked_pexp_letop;
 };
 
 open Ocaml_common;

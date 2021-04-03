@@ -24,6 +24,7 @@ open Btype
 open Ctype
 
 let hacked_pexp_apply = ref (fun _ -> assert false)
+let hacked_pexp_letop = ref (fun _ -> assert false)
 
 type type_forcing_context =
   | If_conditional
@@ -3647,6 +3648,10 @@ and type_expect_
         exp_env = env;
       }
   | Pexp_letop{ let_ = slet; ands = sands; body = sbody } ->
+      let slet =
+        match !hacked_pexp_letop env slet with
+        | Some v -> v
+        | None -> slet in
       let rec loop spat_acc ty_acc sands =
         match sands with
         | [] -> spat_acc, ty_acc
@@ -3711,7 +3716,6 @@ and type_expect_
             exp_type = instance ty_result;
             exp_env = env;
             exp_attributes = sexp.pexp_attributes; }
-
   | Pexp_extension ({ txt = ("ocaml.extension_constructor"
                              |"extension_constructor"); _ },
                     payload) ->

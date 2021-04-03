@@ -23,6 +23,11 @@ val hacked_pexp_apply:
   Parsetree.expression ->
   Typedtree.expression option) ref
 
+val hacked_pexp_letop:
+  (Env.t ->
+   Parsetree.binding_op ->
+   Parsetree.binding_op option) ref
+
 (* This variant is used to print improved error messages, and does not affect
    the behavior of the typechecker itself.
 
