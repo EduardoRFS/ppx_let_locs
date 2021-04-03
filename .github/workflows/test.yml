@@ -36,7 +36,7 @@ jobs:
       - uses: esy/github-action@master
         with:
           manifest: override.json
-          cache-key: ${{ hashFiles('esy.lock/index.json') }}
+          cache-key: ${{ hashFiles('esy.lock/index.json') }}-${{ matrix.version }}
 
       - name: Test
         run: esy @override b dune runtest
