@@ -108,3 +108,15 @@ let to_ = (>>=_backtrace)
   Lwt.return_unit
   (fun () -> Lwt.return_unit)
 ```
+
+**[@ppx_let_locs.use] on signatures**
+
+```ocaml
+(* you type *)
+[@ppx_let_locs.use Lwt.backtrace_bind]
+val ( >>= ) : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b Lwt.t
+
+(* compiler sees *)
+val ( >>=_backtrace ) : (exn -> exn) -> 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b Lwt.t
+val ( >>= ) : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b Lwt.t
+```
