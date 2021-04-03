@@ -1,17 +1,34 @@
-backtraced: 
+Lwt.bind ignore: 
 Raised by primitive operation at Lwt_unix.self_result in file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
-Re-raised at Dune__exe__Test.(fun) in file "test/test.re", line 4, characters 2-10
 Re-raised at Lwt.Miscellaneous.poll in file "src/core/lwt.ml", line 3072, characters 20-29
 Called from Lwt_main.run.run_loop in file "src/unix/lwt_main.ml", line 31, characters 10-20
 Called from Lwt_main.run in file "src/unix/lwt_main.ml", line 118, characters 8-13
 Re-raised at Lwt_main.run in file "src/unix/lwt_main.ml", line 124, characters 4-13
-Called from Dune__exe__Test in file "test/test.re", line 3, characters 3-90
+Called from Dune__exe__Test in file "test/test.re", line 3, characters 3-118
 
-ignore: 
+Lwt.bind backtraced: 
+Raised by primitive operation at Lwt_unix.self_result in file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
+Re-raised at Dune__exe__Test.(fun) in file "test/test.re", line 16, characters 2-10
+Re-raised at Lwt.Miscellaneous.poll in file "src/core/lwt.ml", line 3072, characters 20-29
+Called from Lwt_main.run.run_loop in file "src/unix/lwt_main.ml", line 31, characters 10-20
+Called from Lwt_main.run in file "src/unix/lwt_main.ml", line 118, characters 8-13
+Re-raised at Lwt_main.run in file "src/unix/lwt_main.ml", line 124, characters 4-13
+Called from Dune__exe__Test in file "test/test.re", line 15, characters 3-90
+
+letop ignore: 
 Raised by primitive operation at Lwt_unix.self_result in file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
 Re-raised at Lwt.Miscellaneous.poll in file "src/core/lwt.ml", line 3072, characters 20-29
 Called from Lwt_main.run.run_loop in file "src/unix/lwt_main.ml", line 31, characters 10-20
 Called from Lwt_main.run in file "src/unix/lwt_main.ml", line 118, characters 8-13
 Re-raised at Lwt_main.run in file "src/unix/lwt_main.ml", line 124, characters 4-13
-Called from Dune__exe__Test in file "test/test.re", line 13, characters 3-118
+Called from Dune__exe__Test in file "test/test.re", line 26, characters 3-104
+
+letop backtraced: 
+Raised by primitive operation at Lwt_unix.self_result in file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
+Re-raised at Dune__exe__Test.(fun) in file "test/test.re", line 42, characters 18-49
+Re-raised at Lwt.Miscellaneous.poll in file "src/core/lwt.ml", line 3072, characters 20-29
+Called from Lwt_main.run.run_loop in file "src/unix/lwt_main.ml", line 31, characters 10-20
+Called from Lwt_main.run in file "src/unix/lwt_main.ml", line 118, characters 8-13
+Re-raised at Lwt_main.run in file "src/unix/lwt_main.ml", line 124, characters 4-13
+Called from Dune__exe__Test in file "test/test.re", line 40, characters 3-104
 
