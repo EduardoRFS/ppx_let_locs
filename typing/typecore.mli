@@ -28,6 +28,9 @@ val hacked_pexp_letop:
    Parsetree.binding_op ->
    Parsetree.binding_op option) ref
 
+val hacked_value_binding:
+  (Parsetree.value_binding list -> Parsetree.value_binding list) ref
+
 (* This variant is used to print improved error messages, and does not affect
    the behavior of the typechecker itself.
 

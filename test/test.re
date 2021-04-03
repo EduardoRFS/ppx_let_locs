@@ -36,8 +36,8 @@ try(
   print_newline();
 };
 
-let (let.await) =
-  [@ppx_let_locs.use ((exn, v), f) => Lwt.backtrace_bind(exn, v, f)] Lwt.bind;
+[@ppx_let_locs.use Lwt.backtrace_bind]
+let (let.await) = Lwt.bind;
 
 try(
   {

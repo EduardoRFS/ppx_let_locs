@@ -1,4 +1,9 @@
 let (let.some) = Option.bind;
+let (let.default) = (v, f) =>
+  switch (f()) {
+  | Some(v) => v
+  | None => v
+  };
 module Codegen = {
   open Ppxlib.Selected_ast.Ast.Parsetree;
   open Ppxlib.Ast_builder.Default;
@@ -38,10 +43,11 @@ module Codegen = {
       append_attributes([ppx_let_locs_ignore(loc), merlin_focus(loc)], fn);
     Fun.id([%expr [%e fn]([%e make_reraise_exn(loc)])]);
   };
-  let make_let_with_reraise = let_ => {
+  let make_let_with_reraise = (new_op, let_) => {
     let {pbop_exp, _} = let_;
     {
       ...let_,
+      pbop_op: new_op,
       pbop_exp:
         pexp_tuple(
           ~loc=pbop_exp.pexp_loc,
@@ -51,6 +57,17 @@ module Codegen = {
           ],
         ),
     };
+  };
+
+  let make_additional_binding = (name, body) => {
+    let loc = body.pexp_loc;
+    let additional_binding = {
+      pvb_pat: ppat_var(~loc, name),
+      pvb_expr: [%expr ((exn, v), f) => [%e body](exn, v, f)],
+      pvb_attributes: [],
+      pvb_loc: loc,
+    };
+    additional_binding;
   };
 };
 
@@ -75,6 +92,9 @@ module Typer = {
     );
   let is_backtraced_letop = (env, expr) =>
     Ctype.matches(env, expr, backtraced_letop_typ);
+
+  let prepend_backtrace = str => "backtrace_" ++ str;
+  let append_backtrace = str => str ++ "_backtrace";
 
   // this transforms Lwt.bind into Lwt.backtrace_bind
   let hacked_pexp_apply = (env: Env.t, sfunct: Parsetree.expression) => {
@@ -112,15 +132,19 @@ module Typer = {
   // this will handle letop with signature ((exn => exn, 'a), 'a => 'b) => 'b
   let hacked_pexp_letop = (env: Env.t, slet: Parsetree.binding_op) => {
     // TODO: is it okay to generate Pexp_apply?
+    let backtraced_op = {
+      ...slet.pbop_op,
+      txt: append_backtrace(slet.pbop_op.txt),
+    };
     let lid =
-      Location.mkloc(Longident.Lident(slet.pbop_op.txt), slet.pbop_op.loc);
+      Location.mkloc(Longident.Lident(backtraced_op.txt), backtraced_op.loc);
     let.some (_path, desc) =
       switch (Env.lookup_value(~loc=lid.loc, lid.txt, env)) {
       | value => Some(value)
       | exception _exn => None
       };
     let.some () = is_backtraced_letop(env, desc.val_type) ? Some() : None;
-    Some(Codegen.make_let_with_reraise(slet));
+    Some(Codegen.make_let_with_reraise(backtraced_op, slet));
   };
   Typecore.hacked_pexp_letop := hacked_pexp_letop;
 
@@ -132,17 +156,6 @@ module Typer = {
     open Ctype;
     open Typecore;
     let saved = save_levels();
-    let sexp =
-      switch (sexp.pexp_attributes) {
-      | [
-          {
-            attr_name: {txt: "ppx_let_locs.use", _},
-            attr_payload: PStr([{pstr_desc: Pstr_eval(sexp, []), _}]),
-            _,
-          },
-        ] => sexp
-      | _ => sexp
-      };
     try(f(env, sexp, ty_expected)) {
     | _ =>
       set_levels(saved);
@@ -184,6 +197,33 @@ module Typer = {
     };
   };
   Typecore.hacked_type_expect := hacked_type_expect;
+
+  // pexp_let_locs.use
+  let hacked_value_binding = (spat_list: list(Parsetree.value_binding)) =>
+    spat_list
+    |> List.concat_map(binding => {
+         let.default () = [binding];
+         let.some body =
+           switch (binding.Parsetree.pvb_attributes) {
+           | [
+               {
+                 attr_name: {txt: "ppx_let_locs.use", _},
+                 attr_payload: PStr([{pstr_desc: Pstr_eval(sexp, []), _}]),
+                 _,
+               },
+             ] =>
+             Some(sexp)
+           | _ => None
+           };
+         let.some name =
+           switch (binding.pvb_pat.ppat_desc) {
+           | Ppat_var(name) =>
+             Some({...name, txt: append_backtrace(name.txt)})
+           | _ => None
+           };
+         Some([binding, Codegen.make_additional_binding(name, body)]);
+       });
+  Typecore.hacked_value_binding := hacked_value_binding;
 };
 
 open Ocaml_common;

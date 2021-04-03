@@ -26,6 +26,8 @@ open Ctype
 let hacked_pexp_apply = ref (fun _ -> assert false)
 let hacked_pexp_letop = ref (fun _ -> assert false)
 
+let hacked_value_binding = ref (fun _ -> assert false)
+
 type type_forcing_context =
   | If_conditional
   | If_no_else_branch
@@ -5107,6 +5109,7 @@ and type_andops env sarg sands expected_ty =
 
 let type_binding env rec_flag spat_sexp_list =
   Typetexp.reset_type_variables();
+  let spat_sexp_list = !hacked_value_binding spat_sexp_list in
   let (pat_exp_list, new_env, _unpacks) =
     type_let
       ~check:(fun s -> Warnings.Unused_value_declaration s)
