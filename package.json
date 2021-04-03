@@ -8,10 +8,11 @@
     "test": "esy b dune runtest"
   },
   "dependencies": {
-    "ocaml": "4.12",
+    "ocaml": "4.10.x || 4.12.x",
     "@opam/dune": "*",
     "@opam/reason": "*",
-    "@opam/ppxlib": "*"
+    "@opam/ppxlib": "*",
+    "@opam/ppx_optcomp": "*"
   },
   "devDependencies": {
     "@opam/ocaml-lsp-server": "*",
