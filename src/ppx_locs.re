@@ -75,6 +75,20 @@ module Codegen = {
     };
     additional_binding;
   };
+
+  let make_additional_value_typ = (~loc, is_letop, name, left, right) => {
+    let type_ =
+      is_letop
+        ? [%type: ((exn => exn, [%t left])) => [%t right]]
+        : [%type: (exn => exn, [%t left]) => [%t right]];
+    {
+      psig_loc: loc,
+      psig_desc:
+        Psig_value(
+          value_description(~loc, ~name={txt: name, loc}, ~type_, ~prim=[]),
+        ),
+    };
+  };
 };
 
 module Typer = {
@@ -250,6 +264,60 @@ module Typer = {
          ]);
        });
   Typecore.hacked_value_binding := hacked_value_binding;
+
+  // [@ppx_let_locs.use] on signature
+  let additional_signature_item =
+    fun
+    | Parsetree.{
+        psig_desc:
+          Psig_value({
+            pval_attributes: [
+              {
+                attr_name: {txt: "ppx_let_locs.use", _},
+                attr_payload: PStr([]),
+                _,
+              },
+            ],
+            pval_name,
+            pval_type: {ptyp_desc: Ptyp_arrow(Nolabel, left, right), _},
+            _,
+          }),
+        psig_loc,
+      } => {
+        // TODO: this clearly needs better locs
+        Some(
+          Codegen.make_additional_value_typ(
+            ~loc=psig_loc,
+            is_letop(pval_name.txt),
+            append_backtrace(pval_name.txt),
+            left,
+            right,
+          ),
+        );
+      }
+    | _ => None;
+  let hacked_transl_sig = (item, srem) =>
+    switch (additional_signature_item(item)) {
+    | Some(v) => [v, ...srem]
+    | None => srem
+    };
+  Typemod.hacked_transl_sig := hacked_transl_sig;
+
+  let transform_signature = signature => {
+    let mapper = {
+      ...Ast_mapper.default_mapper,
+      signature: (super, signature) =>
+        signature
+        |> List.concat_map(sigi => {
+             let sigi = Ast_mapper.default_mapper.signature_item(super, sigi);
+             switch (additional_signature_item(sigi)) {
+             | Some(add) => [sigi, add]
+             | None => [sigi]
+             };
+           }),
+    };
+    mapper.signature(mapper, signature);
+  };
 };
 
 open Ocaml_common;
@@ -286,6 +354,7 @@ let transform = str => {
 let () =
   Ppxlib.Driver.(
     register_transformation(
+      ~intf=Typer.transform_signature,
       ~instrument=Instrument.make(transform, ~position=After),
       "ppx_let_locs",
     )

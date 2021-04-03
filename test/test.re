@@ -39,6 +39,15 @@ try(
 [@ppx_let_locs.use Lwt.backtrace_bind]
 let (let.await) = Lwt.bind;
 
+module X: {
+  [@ppx_let_locs.use]
+  let (let.await): (Lwt.t('a), 'a => Lwt.t('b)) => Lwt.t('b);
+} = {
+  [@ppx_let_locs.use Lwt.backtrace_bind]
+  let (let.await) = Lwt.bind;
+};
+open X;
+
 try(
   {
     let.await _ = Lwt_unix.opendir("invalid_dir");

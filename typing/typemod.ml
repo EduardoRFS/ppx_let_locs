@@ -21,6 +21,8 @@ open Parsetree
 open Types
 open Format
 
+let hacked_transl_sig = ref (fun _ -> assert false)
+
 module String = Misc.Stdlib.String
 
 module Sig_component_kind = struct
@@ -1205,6 +1207,7 @@ and transl_signature env sg =
       [] -> [], [], env
     | item :: srem ->
         let loc = item.psig_loc in
+        let srem = !hacked_transl_sig item srem in
         match item.psig_desc with
         | Psig_value sdesc ->
             let (tdesc, newenv) =

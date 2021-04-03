@@ -23,6 +23,11 @@
 open Types
 open Format
 
+val hacked_transl_sig:
+  (Parsetree.signature_item ->
+   Parsetree.signature_item list ->
+   Parsetree.signature_item list) ref
+
 module Signature_names : sig
   type t
 
