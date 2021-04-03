@@ -43,6 +43,8 @@ type type_expected = {
   explanation: type_forcing_context option;
 }
 
+let hacked_type_expect = ref (fun _ -> assert false)
+
 module Datatype_kind = struct
   type t = Record | Variant
 
@@ -2570,36 +2572,9 @@ and type_expect ?in_function ?recarg env sexp ty_expected_explained =
   let exp =
     Builtin_attributes.warning_scope sexp.pexp_attributes
       (fun () ->
-        let saved = save_levels () in
-        try
+        !hacked_type_expect (fun env sexp ty_expected_explained ->
          type_expect_ ?in_function ?recarg env sexp ty_expected_explained
-        with _exn -> 
-          set_levels saved;
-          let loc = sexp.pexp_loc in
-          {
-          exp_desc = Texp_ident
-                        (Path.Pident (Ident.create_local "*type-error*"),
-                        Location.mkloc (Longident.Lident "*type-error*") loc,
-                        { Types.
-                          val_type = ty_expected_explained.ty;
-                          val_kind = Val_reg;
-                          val_loc = loc;
-                          val_attributes = [];
-                          val_uid = Uid.internal_not_actually_unique;
-                        });
-          exp_loc = loc;
-          exp_extra = [];
-          exp_type = ty_expected_explained.ty;
-          exp_env = env;
-          exp_attributes = [{
-            attr_name = { loc; txt = "untype.data" };
-            attr_payload = PStr([{
-              pstr_loc = loc;
-              pstr_desc = Pstr_eval(sexp, [])
-            }]);
-            attr_loc = loc
-          }];
-        }
+        ) env sexp ty_expected_explained
       )
   in
   Cmt_format.set_saved_types

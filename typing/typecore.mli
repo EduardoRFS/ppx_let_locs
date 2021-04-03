@@ -58,6 +58,15 @@ type type_expected = private {
   explanation: type_forcing_context option;
 }
 
+val hacked_type_expect:
+   (((
+     Env.t ->
+     Parsetree.expression ->
+     type_expected ->
+     Typedtree.expression) as 'a) ->
+     'a
+   ) ref
+
 val mk_expected:
   ?explanation:type_forcing_context ->
   type_expr ->
