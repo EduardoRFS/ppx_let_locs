@@ -10,8 +10,9 @@ let (let.default) = (v, f) =>
   | None => v
   };
 module Codegen = {
-  open Ppxlib.Selected_ast.Ast.Parsetree;
-  open Ppxlib.Ast_builder.Default;
+  open Parsetree;
+  open Compat;
+
   let ppx_let_locs_ignore = loc => {
     attr_name: {
       loc,
@@ -35,11 +36,7 @@ module Codegen = {
     },
     attr_payload:
       PStr([
-        pstr_eval(
-          ~loc,
-          pexp_constant(~loc, Pconst_string(str, loc, None)),
-          [],
-        ),
+        pstr_eval(~loc, pexp_constant(~loc, pconst_string(~loc, str)), []),
       ]),
     attr_loc: loc,
   };
@@ -230,12 +227,20 @@ module Typer = {
           Texp_ident(
             Path.Pident(Ident.create_local("*type-error*")),
             Location.mkloc(Longident.Lident("*type-error*"), loc),
-            {
-              Types.val_type: ty_expected.ty,
-              val_kind: Val_reg,
-              val_loc: loc,
-              val_attributes: [],
-              val_uid: Uid.internal_not_actually_unique,
+            switch () {
+            | [@if ocaml_version >= (4, 11, 0)] () => {
+                Types.val_type: ty_expected.ty,
+                val_kind: Val_reg,
+                val_loc: loc,
+                val_attributes: [],
+                val_uid: Uid.internal_not_actually_unique,
+              }
+            | [@if ocaml_version < (4, 11, 0)] () => {
+                Types.val_type: ty_expected.ty,
+                val_kind: Val_reg,
+                val_loc: loc,
+                val_attributes: [],
+              }
             },
           ),
         exp_loc: loc,
@@ -363,6 +368,14 @@ module Typer = {
     };
     mapper.signature(mapper, signature);
   };
+
+  let transform_signature = str =>
+    Ppxlib.Selected_ast.of_ocaml_mapper(
+      Signature,
+      ((), str) => transform_signature(str),
+      (),
+      str,
+    );
 };
 
 open Ocaml_common;
@@ -376,7 +389,21 @@ let env =
 let transform = str => {
   open Ppx_let_locs_typer;
   let env = Lazy.force(env);
-  let (tstr, _, _, _) = Typemod.type_structure(env, str);
+  let loc = {
+    open Location;
+    let {loc_start, loc_ghost: ghost_1, _} =
+      List.nth_opt(str, 0)
+      |> Option.map(v => v.Parsetree.pstr_loc)
+      |> Option.value(~default=none);
+    let {loc_end, loc_ghost: ghost_2, _} =
+      List.rev(str)
+      |> List.nth_opt(_, 0)
+      |> Option.map(v => v.Parsetree.pstr_loc)
+      |> Option.value(~default=none);
+    {loc_start, loc_end, loc_ghost: ghost_1 && ghost_2};
+  };
+  let (tstr, _, _, _) =
+    Compat.call_type_structure(~loc, env, str, Typemod.type_structure);
   let mapper = {
     ...Untypeast.default_mapper,
     expr: (super, expr) =>
@@ -396,6 +423,15 @@ let transform = str => {
   str;
 };
 
+let transform = str =>
+  Ppxlib.Selected_ast.of_ocaml_mapper(
+    Structure,
+    ((), str) => transform(str),
+    (),
+    str,
+  );
+
+Ppxlib.Driver.register_transformation_using_ocaml_current_ast;
 let () =
   Ppxlib.Driver.(
     register_transformation(

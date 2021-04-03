@@ -4,4 +4,4 @@
  (kind ppx_rewriter)
  (libraries ppx_let_locs_typer ppxlib)
  (preprocess
-  (pps ppxlib.metaquot)))
+  (pps ppxlib.metaquot ppx_optcomp)))
