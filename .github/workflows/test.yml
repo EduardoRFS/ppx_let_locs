@@ -8,6 +8,7 @@ jobs:
 
     strategy:
       matrix:
+        version: [4.10.x, 4.12.x]
         system: [macos-latest, ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.system }}
@@ -21,9 +22,21 @@ jobs:
       - name: Install esy
         run: npm install -g esy
 
+      - name: Create esy wrapper
+        run: |
+          echo '{
+            "source": "./package.json",
+            "override": {
+              "dependencies": {
+                "ocaml": "'${{ matrix.version }}'"
+              }
+            }
+          }' > override.json
+
       - uses: esy/github-action@master
         with:
+          manifest: override.json
           cache-key: ${{ hashFiles('esy.lock/index.json') }}
 
       - name: Test
-        run: esy test
+        run: esy @override test
