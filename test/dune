@@ -16,4 +16,4 @@
 (rule
  (alias runtest)
  (action
-  (diff trace.expected trace.result)))
+  (diff trace_%{read:../ocaml_version.txt}.expected trace.result)))
