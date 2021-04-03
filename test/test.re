@@ -51,3 +51,30 @@ try(
   Printexc.print_backtrace(stdout);
   print_newline();
 };
+
+let (>>=) = Lwt.bind;
+try(
+  {
+    Lwt_unix.opendir("invalid_dir") >>= (_ => Lwt.return_unit);
+  }
+  |> Lwt_main.run
+) {
+| _ =>
+  print_endline(">>= ignore: ");
+  Printexc.print_backtrace(stdout);
+  print_newline();
+};
+
+[@ppx_let_locs.use Lwt.backtrace_bind]
+let (>>=) = Lwt.bind;
+try(
+  {
+    Lwt_unix.opendir("invalid_dir") >>= (_ => Lwt.return_unit);
+  }
+  |> Lwt_main.run
+) {
+| _ =>
+  print_endline(">>= backtraced: ");
+  Printexc.print_backtrace(stdout);
+  print_newline();
+};

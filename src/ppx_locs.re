@@ -109,6 +109,15 @@ module Typer = {
       && String.sub(str, 0, 3) == "let"
       && String.index_opt(chars, str.[3]) != None;
   };
+  let transform_lid = (f, lid: Location.loc(Longident.t)) => {
+    ...lid,
+    txt:
+      switch (lid.txt) {
+      | Lapply(_) as lid => lid
+      | Lident(n) => Lident(f(n))
+      | Ldot(path, n) => Ldot(path, f(n))
+      },
+  };
 
   // this transforms Lwt.bind into Lwt.backtrace_bind
   let hacked_pexp_apply = (env: Env.t, sfunct: Parsetree.expression) => {
@@ -118,21 +127,20 @@ module Typer = {
       | (Parsetree.Pexp_ident(lid), []) => Some(lid)
       | _ => None
       };
-    let prepend_backtrace = str => "backtrace_" ++ str;
-    let lid = {
-      ...lid,
-      txt:
-        switch (lid.txt) {
-        | Lapply(_) as lid => lid
-        | Lident(n) => Lident(prepend_backtrace(n))
-        | Ldot(path, n) => Ldot(path, prepend_backtrace(n))
-        },
-    };
-    let.some (_path, desc) =
-      switch (Env.lookup_value(~loc=lid.loc, lid.txt, env)) {
+    let lookup_opt_transform = f =>
+      switch (
+        {
+          let lid = transform_lid(f, lid);
+          (lid, Env.lookup_value(~loc=lid.loc, lid.txt, env) |> snd);
+        }
+      ) {
       | value => Some(value)
       | exception _ => None
       };
+    let.some (lid, desc) = {
+      let.none () = lookup_opt_transform(append_backtrace);
+      lookup_opt_transform(prepend_backtrace);
+    };
     let.some () = is_backtraced_signature(env, desc.val_type) ? Some() : None;
     let sfunct =
       Codegen.make_apply_with_reraise({
