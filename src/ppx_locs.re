@@ -370,12 +370,9 @@ module Typer = {
   };
 
   let transform_signature = str =>
-    Ppxlib.Selected_ast.of_ocaml_mapper(
-      Signature,
-      ((), str) => transform_signature(str),
-      (),
-      str,
-    );
+    Ppxlib.Selected_ast.To_ocaml.copy_signature(str)
+    |> transform_signature
+    |> Ppxlib.Selected_ast.Of_ocaml.copy_signature;
 };
 
 open Ocaml_common;
@@ -424,12 +421,9 @@ let transform = str => {
 };
 
 let transform = str =>
-  Ppxlib.Selected_ast.of_ocaml_mapper(
-    Structure,
-    ((), str) => transform(str),
-    (),
-    str,
-  );
+  Ppxlib.Selected_ast.To_ocaml.copy_structure(str)
+  |> transform
+  |> Ppxlib.Selected_ast.Of_ocaml.copy_structure;
 
 Ppxlib.Driver.register_transformation_using_ocaml_current_ast;
 let () =
