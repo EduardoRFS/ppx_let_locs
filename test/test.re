@@ -1,7 +1,7 @@
 Printexc.record_backtrace(true);
 
 try(
-  ([@ppx_locs.ignore] Lwt.bind)(Lwt_unix.opendir("invalid_dir"), _ =>
+  ([@ppx_let_locs.ignore] Lwt.bind)(Lwt_unix.opendir("invalid_dir"), _ =>
     Lwt.return_unit
   )
   |> Lwt_main.run
@@ -37,7 +37,7 @@ try(
 };
 
 let (let.await) =
-  [@ppx_locs.use ((exn, v), f) => Lwt.backtrace_bind(exn, v, f)] Lwt.bind;
+  [@ppx_let_locs.use ((exn, v), f) => Lwt.backtrace_bind(exn, v, f)] Lwt.bind;
 
 try(
   {

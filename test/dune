@@ -2,7 +2,7 @@
  (name test)
  (libraries lwt lwt.unix)
  (preprocess
-  (staged_pps ppx_locs)))
+  (staged_pps ppx_let_locs)))
 
 (rule
  (targets trace.result)

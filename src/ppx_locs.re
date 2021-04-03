@@ -2,10 +2,10 @@ let (let.some) = Option.bind;
 module Codegen = {
   open Ppxlib.Selected_ast.Ast.Parsetree;
   open Ppxlib.Ast_builder.Default;
-  let ppx_locs_ignore = loc => {
+  let ppx_let_locs_ignore = loc => {
     attr_name: {
       loc,
-      txt: "ppx_locs.ignore",
+      txt: "ppx_let_locs.ignore",
     },
     attr_payload: PStr([]),
     attr_loc: loc,
@@ -35,7 +35,7 @@ module Codegen = {
   let make_apply_with_reraise = fn => {
     let loc = fn.pexp_loc;
     let fn =
-      append_attributes([ppx_locs_ignore(loc), merlin_focus(loc)], fn);
+      append_attributes([ppx_let_locs_ignore(loc), merlin_focus(loc)], fn);
     Fun.id([%expr [%e fn]([%e make_reraise_exn(loc)])]);
   };
   let make_let_with_reraise = let_ => {
@@ -55,7 +55,7 @@ module Codegen = {
 };
 
 module Typer = {
-  open Ppx_locs_typer;
+  open Ppx_let_locs_typer;
 
   let exn_callback_typ =
     Ctype.newty(Tarrow(Nolabel, Predef.type_exn, Predef.type_exn, Cok));
@@ -124,7 +124,7 @@ module Typer = {
   };
   Typecore.hacked_pexp_letop := hacked_pexp_letop;
 
-  // type recovery and ppx_locs.use
+  // type recovery and ppx_let_locs.use
   let hacked_type_expect = (f, env, sexp, ty_expected) => {
     open Parsetree;
     open Typedtree;
@@ -136,7 +136,7 @@ module Typer = {
       switch (sexp.pexp_attributes) {
       | [
           {
-            attr_name: {txt: "ppx_locs.use", _},
+            attr_name: {txt: "ppx_let_locs.use", _},
             attr_payload: PStr([{pstr_desc: Pstr_eval(sexp, []), _}]),
             _,
           },
@@ -195,7 +195,7 @@ let env =
     }
   );
 let transform = str => {
-  open Ppx_locs_typer;
+  open Ppx_let_locs_typer;
   let env = Lazy.force(env);
   let (tstr, _, _, _) = Typemod.type_structure(env, str);
   let mapper = {
@@ -221,6 +221,6 @@ let () =
   Ppxlib.Driver.(
     register_transformation(
       ~instrument=Instrument.make(transform, ~position=After),
-      "ppx_locs",
+      "ppx_let_locs",
     )
   );

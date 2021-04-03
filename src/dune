@@ -1,7 +1,7 @@
 (library
- (name ppx_locs)
- (public_name ppx_locs)
+ (name ppx_let_locs)
+ (public_name ppx_let_locs)
  (kind ppx_rewriter)
- (libraries ppx_locs_typer ppxlib)
+ (libraries ppx_let_locs_typer ppxlib)
  (preprocess
   (pps ppxlib.metaquot)))

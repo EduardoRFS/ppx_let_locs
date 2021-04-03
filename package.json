@@ -1,5 +1,5 @@
 {
-  "name": "ppx_locs",
+  "name": "ppx_let_locs",
   "dependencies": {
     "ocaml": "4.12",
     "@opam/dune": "*",
