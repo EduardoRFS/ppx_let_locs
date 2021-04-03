@@ -5,7 +5,7 @@
     "install": "esy-installer ppx_let_locs.install"
   },
   "scripts": {
-    "test": "dune runtest"
+    "test": "esy b dune runtest"
   },
   "dependencies": {
     "ocaml": "4.12",
