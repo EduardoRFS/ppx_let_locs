@@ -124,7 +124,7 @@ module Typer = {
   };
   Typecore.hacked_pexp_letop := hacked_pexp_letop;
 
-  // type recovery
+  // type recovery and ppx_locs.use
   let hacked_type_expect = (f, env, sexp, ty_expected) => {
     open Parsetree;
     open Typedtree;
@@ -132,6 +132,17 @@ module Typer = {
     open Ctype;
     open Typecore;
     let saved = save_levels();
+    let sexp =
+      switch (sexp.pexp_attributes) {
+      | [
+          {
+            attr_name: {txt: "ppx_locs.use", _},
+            attr_payload: PStr([{pstr_desc: Pstr_eval(sexp, []), _}]),
+            _,
+          },
+        ] => sexp
+      | _ => sexp
+      };
     try(f(env, sexp, ty_expected)) {
     | _ =>
       set_levels(saved);

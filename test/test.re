@@ -36,7 +36,9 @@ try(
   print_newline();
 };
 
-let (let.await) = ((exn, v), f) => Lwt.backtrace_bind(exn, v, f);
+let (let.await) =
+  [@ppx_locs.use ((exn, v), f) => Lwt.backtrace_bind(exn, v, f)] Lwt.bind;
+
 try(
   {
     let.await _ = Lwt_unix.opendir("invalid_dir");
