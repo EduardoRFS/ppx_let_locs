@@ -6,7 +6,7 @@ _ppx_let_locs_ is a typed ppx designed to improve stack traces when using `let m
 
 ### Requirements
 
-- ocaml@4.12
+- ocaml@4.10.x || ocaml@4.12.x
 
 ### esy
 
