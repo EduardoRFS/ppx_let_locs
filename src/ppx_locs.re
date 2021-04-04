@@ -430,7 +430,7 @@ let () =
   Ppxlib.Driver.(
     register_transformation(
       ~intf=Typer.transform_signature,
-      ~instrument=Instrument.make(transform, ~position=After),
+      ~impl=transform,
       "ppx_let_locs",
     )
   );
