@@ -420,12 +420,17 @@ let transform = str => {
   str;
 };
 
-let transform = str =>
-  Ppxlib.Selected_ast.To_ocaml.copy_structure(str)
-  |> transform
-  |> Ppxlib.Selected_ast.Of_ocaml.copy_structure;
+let transform = str => {
+  let is_ocamldep = Ocaml_common.Ast_mapper.tool_name() == "ocamldep";
+  if (is_ocamldep) {
+    str;
+  } else {
+    Ppxlib.Selected_ast.To_ocaml.copy_structure(str)
+    |> transform
+    |> Ppxlib.Selected_ast.Of_ocaml.copy_structure;
+  };
+};
 
-Ppxlib.Driver.register_transformation_using_ocaml_current_ast;
 let () =
   Ppxlib.Driver.(
     register_transformation(
