@@ -87,3 +87,10 @@ try(
   Printexc.print_backtrace(stdout);
   print_newline();
 };
+
+// TODO: this is a bug on OCaml Untypeast
+module X = {
+  type t = {name: string};
+};
+
+let f = (X.{name}) => name;

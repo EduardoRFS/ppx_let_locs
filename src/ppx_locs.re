@@ -385,6 +385,7 @@ let env =
   );
 let transform = str => {
   open Ppx_let_locs_typer;
+  // Format.printf("%a\n%!", Pprintast.structure, str);
   let env = Lazy.force(env);
   let loc = {
     open Location;
@@ -402,6 +403,7 @@ let transform = str => {
   let (tstr, _, _, _) =
     Compat.call_type_structure(~loc, env, str, Typemod.type_structure);
   let mapper = {
+    // TODO: don't trust this, change only nodes that are dirty
     ...Untypeast.default_mapper,
     expr: (super, expr) =>
       switch (expr.exp_attributes) {
@@ -413,6 +415,22 @@ let transform = str => {
           },
         ] => sexp
       | _ => Untypeast.default_mapper.expr(super, expr)
+      },
+    pat: (sub, pat) =>
+      // TODO: upstream this
+      switch (pat) {
+      | {
+          pat_extra: [(Typedtree.Tpat_open(_, lid, _), loc, attrs), ...rem],
+          _,
+        } =>
+        let loc = sub.location(sub, loc);
+        let attrs = sub.attributes(sub, attrs);
+        Ast_helper.Pat.mk(
+          ~loc,
+          ~attrs,
+          Ppat_open(lid, sub.pat(sub, {...pat, pat_extra: rem})),
+        );
+      | _ => Untypeast.default_mapper.pat(sub, pat)
       },
   };
   let str = mapper.structure(mapper, tstr);
