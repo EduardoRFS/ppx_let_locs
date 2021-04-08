@@ -9,6 +9,8 @@ let (let.default) = (v, f) =>
   | Some(v) => v
   | None => v
   };
+
+let counter = ref(0);
 module Codegen = {
   open Parsetree;
   open Compat;
@@ -119,25 +121,45 @@ module Codegen = {
 
 module Typer = {
   open Ppx_let_locs_typer;
-
-  let exn_callback_typ =
-    Ctype.newty(Tarrow(Nolabel, Predef.type_exn, Predef.type_exn, Cok));
-  let backtraced_signature_typ =
-    Ctype.newty(Tarrow(Nolabel, exn_callback_typ, Ctype.newvar(), Cok));
-  let is_backtraced_signature = (env, expr) =>
-    Ctype.matches(env, expr, backtraced_signature_typ);
-
-  let backtraced_letop_typ =
+  let exn_callback_typ = env =>
     Ctype.newty(
       Tarrow(
         Nolabel,
-        Ctype.newty(Ttuple([exn_callback_typ, Ctype.newvar()])),
+        Ctype.newty(
+          Tconstr(
+            Env.lookup_type(~loc=Location.none, Lident("exn"), env) |> fst,
+            [],
+            ref(Types.Mnil),
+          ),
+        ),
+        Ctype.newty(
+          Tconstr(
+            Env.lookup_type(~loc=Location.none, Lident("exn"), env) |> fst,
+            [],
+            ref(Types.Mnil),
+          ),
+        ),
+        Cok,
+      ),
+    );
+  let backtraced_signature_typ = env =>
+    Ctype.newty(
+      Tarrow(Nolabel, exn_callback_typ(env), Ctype.newvar(), Cok),
+    );
+  let is_backtraced_signature = (env, expr) =>
+    Ctype.matches(env, expr, backtraced_signature_typ(env));
+
+  let backtraced_letop_typ = env =>
+    Ctype.newty(
+      Tarrow(
+        Nolabel,
+        Ctype.newty(Ttuple([exn_callback_typ(env), Ctype.newvar()])),
         Ctype.newvar(),
         Cok,
       ),
     );
   let is_backtraced_letop = (env, expr) =>
-    Ctype.matches(env, expr, backtraced_letop_typ);
+    Ctype.matches(env, expr, backtraced_letop_typ(env));
 
   let prepend_backtrace = str => "backtrace_" ++ str;
   let append_backtrace = str => str ++ "_backtrace";
