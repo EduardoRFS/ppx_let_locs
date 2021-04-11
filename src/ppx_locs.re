@@ -9,6 +9,15 @@ let (let.default) = (v, f) =>
   | Some(v) => v
   | None => v
   };
+let snapshot = () => {
+  let bsnap = Btype.snapshot();
+  let clevels = Ctype.save_levels();
+  let restore = () => {
+    Btype.backtrack(bsnap);
+    Ctype.set_levels(clevels);
+  };
+  restore;
+};
 module Codegen = {
   open Parsetree;
   open Compat;
@@ -210,7 +219,7 @@ module Typer = {
   };
   Typecore.hacked_pexp_letop := hacked_pexp_letop;
 
-  // type recovery and ppx_let_locs.use
+  // type recovery on expressions and ppx_let_locs.use
   let hacked_type_expect = (f, env, sexp, ty_expected) => {
     open Parsetree;
     open Typedtree;
@@ -267,6 +276,29 @@ module Typer = {
     };
   };
   Typecore.hacked_type_expect := hacked_type_expect;
+
+  // type recovery on structure item
+  let hack_type_str_item = (f, env, srem, stri) => {
+    let restore = snapshot();
+    try(f(env, srem, stri)) {
+    | _exn =>
+      open Typedtree;
+      restore();
+      // structure type recovery
+      let loc = stri.Parsetree.pstr_loc;
+      let desc =
+        Tstr_attribute({
+          attr_name: {
+            loc,
+            txt: "untype.data",
+          },
+          attr_payload: PStr([stri]),
+          attr_loc: loc,
+        });
+      (desc, [], env);
+    };
+  };
+  Typemod.hack_type_str_item := hack_type_str_item;
 
   // pexp_let_locs.use
   let hacked_value_binding = (spat_list: list(Parsetree.value_binding)) =>
@@ -415,6 +447,15 @@ let transform = str => {
           },
         ] => sexp
       | _ => Untypeast.default_mapper.expr(super, expr)
+      },
+    structure_item: (super, stri) =>
+      switch (stri.str_desc) {
+      | Tstr_attribute({
+          attr_name: {txt: "untype.data", _},
+          attr_payload: PStr([stri]),
+          _,
+        }) => stri
+      | _ => Untypeast.default_mapper.structure_item(super, stri)
       },
     pat: (sub, pat) =>
       // TODO: upstream this

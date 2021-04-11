@@ -21,6 +21,8 @@ open Parsetree
 open Types
 open Format
 
+let hack_type_str_item = ref (fun _ -> assert false)
+
 let hacked_transl_sig = ref (fun _ -> assert false)
 
 module String = Misc.Stdlib.String
@@ -2399,6 +2401,7 @@ and type_structure ?(toplevel = false) funct_body anchor env sstr scope =
         Builtin_attributes.warning_attribute x;
         Tstr_attribute x, [], env
   in
+  let type_str_item = !hack_type_str_item type_str_item in
   let rec type_struct env sstr =
     match sstr with
     | [] -> ([], [], env)
