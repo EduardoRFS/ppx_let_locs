@@ -1,0 +1,51 @@
+Lwt.bind ignore: 
+Raised by primitive operation at file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
+Re-raised at file "src/core/lwt.ml", line 3072, characters 20-29
+Called from file "src/unix/lwt_main.ml", line 31, characters 10-20
+Called from file "src/unix/lwt_main.ml", line 118, characters 8-13
+Re-raised at file "src/unix/lwt_main.ml", line 124, characters 4-13
+Called from file "test/test.re", line 3, characters 3-122
+
+Lwt.bind backtraced: 
+Raised by primitive operation at file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
+Re-raised at file "test/test.re", line 16, characters 2-10
+Re-raised at file "src/core/lwt.ml", line 3072, characters 20-29
+Called from file "src/unix/lwt_main.ml", line 31, characters 10-20
+Called from file "src/unix/lwt_main.ml", line 118, characters 8-13
+Re-raised at file "src/unix/lwt_main.ml", line 124, characters 4-13
+Called from file "test/test.re", line 15, characters 3-90
+
+letop ignore: 
+Raised by primitive operation at file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
+Re-raised at file "src/core/lwt.ml", line 3072, characters 20-29
+Called from file "src/unix/lwt_main.ml", line 31, characters 10-20
+Called from file "src/unix/lwt_main.ml", line 118, characters 8-13
+Re-raised at file "src/unix/lwt_main.ml", line 124, characters 4-13
+Called from file "test/test.re", line 26, characters 3-104
+
+letop backtraced: 
+Raised by primitive operation at file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
+Re-raised at file "test/test.re", line 53, characters 18-49
+Re-raised at file "src/core/lwt.ml", line 3072, characters 20-29
+Called from file "src/unix/lwt_main.ml", line 31, characters 10-20
+Called from file "src/unix/lwt_main.ml", line 118, characters 8-13
+Re-raised at file "src/unix/lwt_main.ml", line 124, characters 4-13
+Called from file "test/test.re", line 51, characters 3-104
+
+>>= ignore: 
+Raised by primitive operation at file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
+Re-raised at file "src/core/lwt.ml", line 3072, characters 20-29
+Called from file "src/unix/lwt_main.ml", line 31, characters 10-20
+Called from file "src/unix/lwt_main.ml", line 118, characters 8-13
+Re-raised at file "src/unix/lwt_main.ml", line 124, characters 4-13
+Called from file "test/test.re", line 65, characters 3-96
+
+>>= backtraced: 
+Raised by primitive operation at file "src/unix/lwt_unix.cppo.ml", line 237, characters 14-31
+Re-raised at file "test/test.re", line 81, characters 36-39
+Re-raised at file "src/core/lwt.ml", line 3072, characters 20-29
+Called from file "src/unix/lwt_main.ml", line 31, characters 10-20
+Called from file "src/unix/lwt_main.ml", line 118, characters 8-13
+Re-raised at file "src/unix/lwt_main.ml", line 124, characters 4-13
+Called from file "test/test.re", line 79, characters 3-96
+
