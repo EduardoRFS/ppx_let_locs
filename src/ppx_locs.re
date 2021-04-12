@@ -1,3 +1,11 @@
+open Ppxlib;
+open Ppx_let_locs_ocaml_stdlib;
+open Ppx_let_locs_ocaml_parsing;
+open Ppx_let_locs_ocaml_typing;
+open Ppx_let_locs_ocaml_driver;
+
+Printexc.record_backtrace(true);
+
 let (let.some) = Option.bind;
 let (let.none) = (v, f) =>
   switch (v) {
@@ -20,7 +28,7 @@ let snapshot = () => {
 };
 module Codegen = {
   open Parsetree;
-  open Compat;
+  open Utils;
 
   let ppx_let_locs_ignore = loc => {
     attr_name: {
@@ -127,8 +135,6 @@ module Codegen = {
 };
 
 module Typer = {
-  open Ppx_let_locs_typer;
-
   let exn_callback_typ =
     Ctype.newty(Tarrow(Nolabel, Predef.type_exn, Predef.type_exn, Cok));
   let backtraced_signature_typ =
@@ -236,20 +242,12 @@ module Typer = {
           Texp_ident(
             Path.Pident(Ident.create_local("*type-error*")),
             Location.mkloc(Longident.Lident("*type-error*"), loc),
-            switch () {
-            | [@if ocaml_version >= (4, 11, 0)] () => {
-                Types.val_type: ty_expected.ty,
-                val_kind: Val_reg,
-                val_loc: loc,
-                val_attributes: [],
-                val_uid: Uid.internal_not_actually_unique,
-              }
-            | [@if ocaml_version < (4, 11, 0)] () => {
-                Types.val_type: ty_expected.ty,
-                val_kind: Val_reg,
-                val_loc: loc,
-                val_attributes: [],
-              }
+            {
+              Types.val_type: ty_expected.ty,
+              val_kind: Val_reg,
+              val_loc: loc,
+              val_attributes: [],
+              val_uid: Uid.internal_not_actually_unique,
             },
           ),
         exp_loc: loc,
@@ -400,14 +398,8 @@ module Typer = {
     };
     mapper.signature(mapper, signature);
   };
-
-  let transform_signature = str =>
-    Ppxlib.Selected_ast.To_ocaml.copy_signature(str)
-    |> transform_signature
-    |> Ppxlib.Selected_ast.Of_ocaml.copy_signature;
 };
 
-open Ocaml_common;
 let env =
   lazy(
     {
@@ -416,24 +408,9 @@ let env =
     }
   );
 let transform = str => {
-  open Ppx_let_locs_typer;
   // Format.printf("%a\n%!", Pprintast.structure, str);
   let env = Lazy.force(env);
-  let loc = {
-    open Location;
-    let {loc_start, loc_ghost: ghost_1, _} =
-      List.nth_opt(str, 0)
-      |> Option.map(v => v.Parsetree.pstr_loc)
-      |> Option.value(~default=none);
-    let {loc_end, loc_ghost: ghost_2, _} =
-      List.rev(str)
-      |> List.nth_opt(_, 0)
-      |> Option.map(v => v.Parsetree.pstr_loc)
-      |> Option.value(~default=none);
-    {loc_start, loc_end, loc_ghost: ghost_1 && ghost_2};
-  };
-  let (tstr, _, _, _) =
-    Compat.call_type_structure(~loc, env, str, Typemod.type_structure);
+  let (tstr, _, _, _) = Typemod.type_structure(env, str);
   let mapper = {
     // TODO: don't trust this, change only nodes that are dirty
     ...Untypeast.default_mapper,
@@ -481,13 +458,7 @@ let transform = str => {
 
 let transform = str => {
   let is_ocamldep = Ocaml_common.Ast_mapper.tool_name() == "ocamldep";
-  if (is_ocamldep) {
-    str;
-  } else {
-    Ppxlib.Selected_ast.To_ocaml.copy_structure(str)
-    |> transform
-    |> Ppxlib.Selected_ast.Of_ocaml.copy_structure;
-  };
+  is_ocamldep ? str : transform(str);
 };
 
 let () =
