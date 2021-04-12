@@ -53,6 +53,7 @@ let input_cmi ic =
       cmi_flags = flags;
     }
 
+(*
 let read_cmi filename =
   let ic = open_in_bin filename in
   try
@@ -81,6 +82,43 @@ let read_cmi filename =
     | Error e ->
       close_in ic;
       raise (Error e)
+*)
+
+module Of_ocaml = struct
+  open Migrate_types
+
+  let copy_signature (signature: Ocaml_common.Types.signature): Types.signature =
+    (* TODO: improve this by a lot *)
+    let module Transformations = struct
+      let signature: Ocaml_common.Types.signature = Obj.magic signature
+      [%%if ocaml_version < (4, 09, 0)]
+      let signature = Migrate_408_409.copy_signature (Obj.magic signature)
+      [%%endif]
+      [%%if ocaml_version < (4, 10, 0)]
+      let signature = Migrate_409_410.copy_signature (Obj.magic signature)
+      [%%endif]
+      [%%if ocaml_version < (4, 11, 0)]
+      let signature = Migrate_410_411.copy_signature (Obj.magic signature)
+      [%%endif]
+      [%%if ocaml_version < (4, 12, 0)]
+      let signature = Migrate_411_412.copy_signature (Obj.magic signature)
+      [%%endif]
+      let signature: Types.signature = Obj.magic signature
+    end in
+    Transformations.signature
+
+  let copy_flags: Ocaml_common.Cmi_format.pers_flags -> pers_flags = Obj.magic
+  let copy_cmi_infos Ocaml_common.Cmi_format.{ cmi_name; cmi_sign; cmi_crcs; cmi_flags } = 
+    {
+      cmi_name;
+      cmi_sign = copy_signature cmi_sign;
+      cmi_crcs;
+      cmi_flags = List.map copy_flags cmi_flags;
+    }
+end
+let read_cmi filename =
+  let open Ocaml_common in
+  Of_ocaml.copy_cmi_infos (Cmi_format.read_cmi filename)
 
 let output_cmi filename oc cmi =
 (* beware: the provided signature must have been substituted for saving *)
