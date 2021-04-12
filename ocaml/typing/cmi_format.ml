@@ -85,7 +85,7 @@ let read_cmi filename =
 *)
 
 module Of_ocaml = struct
-  open Migrate_types
+  open! Migrate_types
 
   let copy_signature (signature: Ocaml_common.Types.signature): Types.signature =
     (* TODO: improve this by a lot *)
