@@ -1,0 +1,13 @@
+(library
+ (name ppx_let_locs_ocaml_typing)
+ (public_name ppx_let_locs.ocaml.typing)
+ (modules_without_implementation annot outcometree lambda debuginfo)
+ (flags
+  (:standard
+   -w
+   -9
+   -open
+   Ppx_let_locs_ocaml_utils
+   -open
+   Ppx_let_locs_ocaml_parsing))
+ (libraries ppx_let_locs_ocaml_utils ppx_let_locs_ocaml_parsing))

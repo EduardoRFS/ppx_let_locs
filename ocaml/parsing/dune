@@ -1,0 +1,7 @@
+(library
+ (name ppx_let_locs_ocaml_parsing)
+ (modules_without_implementation asttypes parsetree)
+ (public_name ppx_let_locs.ocaml.parsing)
+ (flags
+  (:standard -w -9 -open Ppx_let_locs_ocaml_utils))
+ (libraries ppx_let_locs_ocaml_utils))
