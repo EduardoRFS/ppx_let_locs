@@ -796,7 +796,8 @@ let rec alpha_pat
   | d ->
      let pat_desc =
        shallow_map_pattern_desc { f = fun p -> alpha_pat env p } d in
-     {p with pat_desc}
+     let pat = {p with pat_desc} in
+     pat
 
 let mkloc = Location.mkloc
 let mknoloc = Location.mknoloc

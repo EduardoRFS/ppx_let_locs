@@ -9,5 +9,10 @@
    -open
    Ppx_let_locs_ocaml_utils
    -open
+   Ppx_let_locs_ocaml_stdlib
+   -open
    Ppx_let_locs_ocaml_parsing))
- (libraries ppx_let_locs_ocaml_utils ppx_let_locs_ocaml_parsing))
+ (libraries
+  ppx_let_locs_ocaml_utils
+  ppx_let_locs_ocaml_stdlib
+  ppx_let_locs_ocaml_parsing))

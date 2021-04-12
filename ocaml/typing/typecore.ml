@@ -3827,7 +3827,7 @@ and type_label_access env srecord lid =
 and type_format loc str env =
   let loc = {loc with Location.loc_ghost = true} in
   try
-    CamlinternalFormatBasics.(CamlinternalFormat.(
+    CamlinternalFormatBasics_412.(CamlinternalFormat_412.(
       let mk_exp_loc pexp_desc = {
         pexp_desc = pexp_desc;
         pexp_loc = loc;
@@ -3877,7 +3877,7 @@ and type_format loc str env =
         | Open_box (Format (fmt', str')) ->
           mk_constr "Open_box" [ mk_format fmt' str' ]
       and mk_format : type a b c d e f .
-          (a, b, c, d, e, f) CamlinternalFormatBasics.fmt -> string ->
+          (a, b, c, d, e, f) CamlinternalFormatBasics_412.fmt -> string ->
           Parsetree.expression = fun fmt str ->
         mk_constr "Format" [ mk_fmt fmt; mk_string str ]
       and mk_side side = match side with
