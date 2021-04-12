@@ -8,13 +8,10 @@
  (name ppx_let_locs)
  (depends
   (ocaml
-   (or
-    (and
-     (>= "4.12.0")
-     (< "4.13.0"))
-    (and
-     (>= "4.10.0")
-     (< "4.11.0"))))
+   (and
+    (>= "4.08.0")
+    (< "4.13.0")))
   reason
   ppxlib
-  ppx_optcomp))
+  ppx_optcomp
+  ocaml-migrate-types))

@@ -1,5 +1,5 @@
 {
-  "checksum": "070710fe3fa39c8e103bd40cb43c12dc",
+  "checksum": "232d6c1e4185395e4003c42d856a2afc",
   "root": "ppx_let_locs@link-dev:./package.json",
   "node": {
     "ppx_let_locs@link-dev:./package.json": {
@@ -16,6 +16,8 @@
         "ocaml@4.12.0@d41d8cd9", "@opam/reason@opam:3.7.0@191be014",
         "@opam/ppxlib@opam:0.22.0@d2d2223a",
         "@opam/ppx_optcomp@opam:v0.14.1@181fd1a0",
+        "@opam/ocaml-migrate-types@github:EduardoRFS/ocaml-migrate-types:ocaml-migrate-types.opam#b00ab6700559f62e42baa565838da1e90efdf3ca@d41d8cd9",
+        "@opam/ocaml-compiler-libs@opam:v0.12.3@f0f069bd",
         "@opam/dune@opam:2.8.5@83fb0224"
       ],
       "devDependencies": [
@@ -388,6 +390,30 @@
         "ocaml@4.12.0@d41d8cd9", "@esy-ocaml/substs@0.0.1@d41d8cd9"
       ],
       "devDependencies": [ "ocaml@4.12.0@d41d8cd9" ]
+    },
+    "@opam/ocaml-migrate-types@github:EduardoRFS/ocaml-migrate-types:ocaml-migrate-types.opam#b00ab6700559f62e42baa565838da1e90efdf3ca@d41d8cd9": {
+      "id":
+        "@opam/ocaml-migrate-types@github:EduardoRFS/ocaml-migrate-types:ocaml-migrate-types.opam#b00ab6700559f62e42baa565838da1e90efdf3ca@d41d8cd9",
+      "name": "@opam/ocaml-migrate-types",
+      "version":
+        "github:EduardoRFS/ocaml-migrate-types:ocaml-migrate-types.opam#b00ab6700559f62e42baa565838da1e90efdf3ca",
+      "source": {
+        "type": "install",
+        "source": [
+          "github:EduardoRFS/ocaml-migrate-types:ocaml-migrate-types.opam#b00ab6700559f62e42baa565838da1e90efdf3ca"
+        ]
+      },
+      "overrides": [],
+      "dependencies": [
+        "ocaml@4.12.0@d41d8cd9",
+        "@opam/ocaml-migrate-parsetree@opam:2.1.0@a3b6747d",
+        "@opam/dune@opam:2.8.5@83fb0224", "@esy-ocaml/substs@0.0.1@d41d8cd9"
+      ],
+      "devDependencies": [
+        "ocaml@4.12.0@d41d8cd9",
+        "@opam/ocaml-migrate-parsetree@opam:2.1.0@a3b6747d",
+        "@opam/dune@opam:2.8.5@83fb0224"
+      ]
     },
     "@opam/ocaml-migrate-parsetree@opam:2.1.0@a3b6747d": {
       "id": "@opam/ocaml-migrate-parsetree@opam:2.1.0@a3b6747d",

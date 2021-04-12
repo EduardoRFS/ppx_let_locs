@@ -8,11 +8,13 @@
     "test": "esy b dune runtest"
   },
   "dependencies": {
-    "ocaml": "4.10.x || 4.12.x",
+    "ocaml": ">= 4.08.x",
     "@opam/dune": "*",
     "@opam/reason": "*",
     "@opam/ppxlib": "*",
-    "@opam/ppx_optcomp": "*"
+    "@opam/ppx_optcomp": "*",
+    "@opam/ocaml-compiler-libs": "*",
+    "@opam/ocaml-migrate-types": "EduardoRFS/ocaml-migrate-types:ocaml-migrate-types.opam"
   },
   "devDependencies": {
     "@opam/ocaml-lsp-server": "*",

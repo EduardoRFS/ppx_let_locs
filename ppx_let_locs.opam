@@ -2,10 +2,11 @@
 opam-version: "2.0"
 depends: [
   "dune" {>= "2.8"}
-  "ocaml" {>= "4.12.0" & < "4.13.0" | >= "4.10.0" & < "4.11.0"}
+  "ocaml" {>= "4.08.0" & < "4.13.0"}
   "reason"
   "ppxlib"
   "ppx_optcomp"
+  "ocaml-migrate-types"
   "odoc" {with-doc}
 ]
 build: [
@@ -21,4 +22,7 @@ build: [
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
+]
+pin-depends: [
+  [ "ocaml-migrate-types.dev" "git+https://github.com/EduardoRFS/ocaml-migrate-types.git"]
 ]

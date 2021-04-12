@@ -3,7 +3,6 @@
  (public_name ppx_let_locs)
  (kind ppx_rewriter)
  (libraries
-  ppx_let_locs_typer
   ppxlib
   ppx_let_locs_ocaml_stdlib
   ppx_let_locs_ocaml_parsing
