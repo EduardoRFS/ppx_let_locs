@@ -222,3 +222,26 @@ val constant: Parsetree.constant -> (Asttypes.constant, error) result
 val check_recursive_bindings : Env.t -> Typedtree.value_binding list -> unit
 val check_recursive_class_bindings :
   Env.t -> Ident.t list -> Typedtree.class_expr list -> unit
+
+(* hack *)
+val hacked_pexp_apply:
+  (Env.t ->
+  Parsetree.expression ->
+  Typedtree.expression option) ref
+
+val hacked_pexp_letop:
+  (Env.t ->
+   Parsetree.binding_op ->
+   Parsetree.binding_op option) ref
+
+val hacked_value_binding:
+  (Parsetree.value_binding list -> Parsetree.value_binding list) ref
+
+val hacked_type_expect:
+   ((
+     Env.t ->
+     Parsetree.expression ->
+     type_expected ->
+     Typedtree.expression as 'a) ->
+     'a
+   ) ref

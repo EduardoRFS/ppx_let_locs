@@ -13,6 +13,9 @@
    -open
    Ppx_let_locs_ocaml_parsing))
  (libraries
+  ocaml-migrate-types
   ppx_let_locs_ocaml_utils
   ppx_let_locs_ocaml_stdlib
-  ppx_let_locs_ocaml_parsing))
+  ppx_let_locs_ocaml_parsing)
+ (preprocess
+  (pps ppx_optcomp)))

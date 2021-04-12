@@ -23,6 +23,11 @@ open Typedtree
 open Btype
 open Ctype
 
+let hacked_pexp_apply = ref (fun _ -> assert false)
+let hacked_pexp_letop = ref (fun _ -> assert false)
+
+let hacked_value_binding = ref (fun _ -> assert false)
+
 type type_forcing_context =
   | If_conditional
   | If_no_else_branch
@@ -39,6 +44,8 @@ type type_expected = {
   ty: type_expr;
   explanation: type_forcing_context option;
 }
+
+let hacked_type_expect = ref (fun _ -> assert false)
 
 module Datatype_kind = struct
   type t = Record | Variant
@@ -2567,7 +2574,9 @@ and type_expect ?in_function ?recarg env sexp ty_expected_explained =
   let exp =
     Builtin_attributes.warning_scope sexp.pexp_attributes
       (fun () ->
+        !hacked_type_expect (fun env sexp ty_expected_explained ->
          type_expect_ ?in_function ?recarg env sexp ty_expected_explained
+        ) env sexp ty_expected_explained
       )
   in
   Cmt_format.set_saved_types
@@ -2731,7 +2740,11 @@ and type_expect_
       assert (sargs <> []);
       begin_def (); (* one more level for non-returning functions *)
       if !Clflags.principal then begin_def ();
+      let funct = match !hacked_pexp_apply env sfunct with
+      | Some v -> v
+      | None ->
       let funct = type_exp env sfunct in
+      funct in
       if !Clflags.principal then begin
           end_def ();
           generalize_structure funct.exp_type
@@ -3612,6 +3625,10 @@ and type_expect_
         exp_env = env;
       }
   | Pexp_letop{ let_ = slet; ands = sands; body = sbody } ->
+      let slet =
+        match !hacked_pexp_letop env slet with
+        | Some v -> v
+        | None -> slet in
       let rec loop spat_acc ty_acc sands =
         match sands with
         | [] -> spat_acc, ty_acc
@@ -5093,6 +5110,7 @@ and type_andops env sarg sands expected_ty =
 
 let type_binding env rec_flag spat_sexp_list =
   Typetexp.reset_type_variables();
+  let spat_sexp_list = !hacked_value_binding spat_sexp_list in
   let (pat_exp_list, new_env, _unpacks) =
     type_let
       ~check:(fun s -> Warnings.Unused_value_declaration s)
@@ -5116,6 +5134,9 @@ let type_expression env sexp =
   end_def();
   if maybe_expansive exp then lower_contravariant env exp.exp_type;
   generalize exp.exp_type;
+  match exp.exp_attributes with
+  | [ { attr_name = { txt = "untype.data"; _ }; _  } ] -> exp
+  | _ -> 
   match sexp.pexp_desc with
     Pexp_ident lid ->
       let loc = sexp.pexp_loc in

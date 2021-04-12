@@ -136,3 +136,19 @@ exception Error of Location.t * Env.t * error
 exception Error_forward of Location.error
 
 val report_error: Env.t -> formatter -> error -> unit
+
+(* hack *)
+val hacked_transl_sig:
+  (Parsetree.signature_item ->
+   Parsetree.signature_item list ->
+   Parsetree.signature_item *
+   Parsetree.signature_item list) ref
+
+val hack_type_str_item:
+  (
+    (Env.t ->
+      unit ->
+      Parsetree.structure_item ->
+      Typedtree.structure_item_desc * Types.signature_item list * Env.t as 'a) ->
+    'a
+  ) ref
