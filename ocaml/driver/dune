@@ -1,0 +1,20 @@
+(library
+ (name ppx_let_locs_ocaml_driver)
+ (public_name ppx_let_locs.ocaml.driver)
+ (flags
+  (:standard
+   -w
+   -9
+   -open
+   Ppx_let_locs_ocaml_utils
+   -open
+   Ppx_let_locs_ocaml_stdlib
+   -open
+   Ppx_let_locs_ocaml_parsing
+   -open
+   Ppx_let_locs_ocaml_typing))
+ (libraries
+  ppx_let_locs_ocaml_utils
+  ppx_let_locs_ocaml_stdlib
+  ppx_let_locs_ocaml_parsing
+  ppx_let_locs_ocaml_typing))
