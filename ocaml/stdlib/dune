@@ -1,5 +1,6 @@
 (library
  (name ppx_let_locs_ocaml_stdlib)
  (public_name ppx_let_locs.ocaml.stdlib)
+ (libraries ocaml-migrate-parsetree)
  (preprocess
   (pps ppx_optcomp)))

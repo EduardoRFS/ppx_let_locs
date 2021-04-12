@@ -1,6 +1,5 @@
 (library
  (name ppx_let_locs_ocaml_parsing)
- (modules_without_implementation asttypes parsetree)
  (public_name ppx_let_locs.ocaml.parsing)
  (flags
   (:standard
@@ -10,4 +9,8 @@
    Ppx_let_locs_ocaml_utils
    -open
    Ppx_let_locs_ocaml_stdlib))
- (libraries ppx_let_locs_ocaml_utils ppx_let_locs_ocaml_stdlib))
+ (libraries
+  ocaml-compiler-libs.common
+  ocaml-migrate-parsetree
+  ppx_let_locs_ocaml_utils
+  ppx_let_locs_ocaml_stdlib))

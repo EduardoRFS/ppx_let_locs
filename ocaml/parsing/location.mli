@@ -63,7 +63,7 @@ val rhs_interval: int -> int -> t
 val get_pos_info: Lexing.position -> string * int * int
 (** file, line, char *)
 
-type 'a loc = {
+type 'a loc = 'a Ocaml_common.Location.loc = {
   txt : 'a;
   loc : t;
 }

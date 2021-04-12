@@ -20,7 +20,7 @@
 
 *)
 
-type t =
+type t = Ocaml_common.Longident.t =
     Lident of string
   | Ldot of t * string
   | Lapply of t * t

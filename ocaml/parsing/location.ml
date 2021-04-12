@@ -70,7 +70,7 @@ let get_pos_info pos =
   (pos.pos_fname, pos.pos_lnum, pos.pos_cnum - pos.pos_bol)
 ;;
 
-type 'a loc = {
+type 'a loc = 'a Ocaml_common.Location.loc = {
   txt : 'a;
   loc : t;
 }

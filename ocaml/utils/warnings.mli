@@ -20,7 +20,7 @@
 
 *)
 
-type loc = {
+type loc = Ocaml_common.Warnings.loc = {
   loc_start: Lexing.position;
   loc_end: Lexing.position;
   loc_ghost: bool;

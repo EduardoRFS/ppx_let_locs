@@ -1,3 +1,4 @@
 (library
  (name ppx_let_locs_ocaml_utils)
- (public_name ppx_let_locs.ocaml.utils))
+ (public_name ppx_let_locs.ocaml.utils)
+ (libraries ocaml-compiler-libs.common))
